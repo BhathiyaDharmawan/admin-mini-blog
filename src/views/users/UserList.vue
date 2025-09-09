@@ -22,8 +22,12 @@
             <td>{{ u.email }}</td>
             <td>
               <div class="btn-group btn-group-sm">
-                <router-link class="btn btn-outline-secondary" :to="`/users/${u.id}`">Edit</router-link>
-                <button class="btn btn-outline-danger" @click="onDelete(u.id)">Hapus</button>
+                <router-link class="btn btn-outline-primary" :to="`/users/${u.id}`">
+                  <i class="fas fa-edit"></i>
+                </router-link>
+                <button class="btn btn-outline-danger" @click="onDelete(u.id)" type="button">
+                  <i class="fas fa-trash"></i>
+                </button>
               </div>
             </td>
           </tr>
@@ -40,9 +44,11 @@
 import { ref, onMounted } from "vue";
 import { UserAPI } from "@/services/api";
 import LoadingSpinner from "@/components/LoadingSpinner.vue";
+import { useToast } from "vue-toastification";  // Import useToast
 
 const users = ref([]);
 const loading = ref(true);
+const toast = useToast();  // Inisialisasi toast
 
 async function fetchData() {
   loading.value = true;
@@ -51,6 +57,10 @@ async function fetchData() {
     users.value = Array.isArray(resp.data) ? resp.data : (resp.data?.results ?? []);
   } catch (e) {
     console.error("Error fetching users:", e);
+    toast.error("Gagal memuat data pengguna", {
+      timeout: 3000,
+      icon: '❌'
+    });
   } finally {
     loading.value = false;
   }
@@ -58,8 +68,21 @@ async function fetchData() {
 
 async function onDelete(id) {
   if (!confirm("Hapus pengguna ini?")) return;
-  await UserAPI.remove(id);
-  await fetchData();
+
+  try {
+    await UserAPI.remove(id);
+    toast.success("Pengguna berhasil dihapus!", {
+      timeout: 3000,
+      icon: '✅'
+    });
+    await fetchData();  // Refresh data setelah penghapusan
+  } catch (e) {
+    console.error("Error deleting user:", e);
+    toast.error("Gagal menghapus pengguna", {
+      timeout: 3000,
+      icon: '❌'
+    });
+  }
 }
 
 onMounted(fetchData);

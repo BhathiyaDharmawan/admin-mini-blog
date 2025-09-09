@@ -10,7 +10,7 @@
           Mini Blog Admin
         </span>
       </div>
-      <button class="dropdown-item text-danger" @click="$emit('logout')">
+      <button class="dropdown-item text-danger" @click="handleLogout" type="button">
         <i class="fas fa-sign-out-alt me-2"></i>Logout
       </button>
     </div>
@@ -18,8 +18,36 @@
 </template>
 
 <script setup>
+import { useToast } from "vue-toastification"
+import { useRouter } from 'vue-router'
+
+const toast = useToast()
+const router = useRouter()
+
 // Define emits
-defineEmits(["logout"]);
+const emit = defineEmits(["logout"])
+
+const handleLogout = () => {
+  setTimeout(() => {
+    // Hapus token dari localStorage
+    localStorage.removeItem('mb_token')
+    
+    // Tampilkan toast sukses logout
+    toast.success('Logout berhasil! Sampai jumpa kembali.', {
+      timeout: 2000,
+      icon: '👋'
+    })
+    
+    // Tunggu sebentar sebelum redirect
+    setTimeout(() => {
+      // Emit event logout ke parent component
+      emit('logout')
+      
+      // Redirect ke halaman login
+      router.push({ name: 'login' })
+    }, 1000)
+  }, 500)
+}
 </script>
 
 <style scoped>

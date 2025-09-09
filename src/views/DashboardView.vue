@@ -108,7 +108,7 @@
                 <i class="fas fa-clock me-2 text-primary"></i>
                 Recent Activities
               </h5>
-              <button class="btn btn-outline-primary btn-sm">
+              <button class="btn btn-outline-primary btn-sm" type="button">
                 <i class="fas fa-sync-alt"></i> Refresh
               </button>
             </div>
@@ -141,25 +141,25 @@
           <div class="card-body">
             <div class="row g-2">
               <div class="col-6">
-                <button class="btn btn-outline-primary w-100 quick-action-btn" @click="navigateToPage('/articles')">
+                <button class="btn btn-outline-primary w-100 quick-action-btn" @click="navigateToPage('/articles')" type="button">
                   <i class="fas fa-plus mb-2"></i>
                   <div>New Article</div>
                 </button>
               </div>
               <div class="col-6">
-                <button class="btn btn-outline-success w-100 quick-action-btn" @click="navigateToPage('/categories')">
+                <button class="btn btn-outline-success w-100 quick-action-btn" @click="navigateToPage('/categories')" type="button">
                   <i class="fas fa-tags mb-2"></i>
                   <div>Categories</div>
                 </button>
               </div>
               <div class="col-6">
-                <button class="btn btn-outline-info w-100 quick-action-btn" @click="navigateToPage('/users')">
+                <button class="btn btn-outline-info w-100 quick-action-btn" @click="navigateToPage('/users')" type="button">
                   <i class="fas fa-users mb-2"></i>
                   <div>Manage Users</div>
                 </button>
               </div>
               <div class="col-6">
-                <button class="btn btn-outline-secondary w-100 quick-action-btn">
+                <button class="btn btn-outline-secondary w-100 quick-action-btn" type="button">
                   <i class="fas fa-cog mb-2"></i>
                   <div>Settings</div>
                 </button>

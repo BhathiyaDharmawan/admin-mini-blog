@@ -80,12 +80,6 @@
                   </button>
                 </div>
 
-                <!-- Error Message -->
-                <div v-if="error" class="alert alert-danger d-flex align-items-center animate-shake" role="alert">
-                  <i class="fas fa-exclamation-triangle me-2"></i>
-                  <div>{{ error }}</div>
-                </div>
-
               </form>
             </div>
 
@@ -109,25 +103,52 @@
 import { reactive, ref } from 'vue'
 import { login } from '../services/api'
 import { useRouter } from 'vue-router'
+import { useToast } from "vue-toastification"
 
 const router = useRouter()
+const toast = useToast()
 const form = reactive({ username: '', password: '' })
 const loading = ref(false)
-const error = ref('')
 
 async function onSubmit() {
-  console.log('submit') 
-  error.value = ''
   loading.value = true
+  
   try {
     const data = await login({ username: form.username, password: form.password })
     const token = data?.access
-    if (!token) throw new Error('Token tidak ditemukan')
+    
+    if (!token) {
+      toast.error('Token tidak ditemukan dalam respons server')
+      return
+    }
+    
     localStorage.setItem('mb_token', token)
-    router.push({ name: 'dashboard' })
-  } catch (e) {
-    console.error(e)
-    error.value = e?.response?.data?.detail || 'Login gagal'
+    
+    // Toast sukses
+    toast.success('Login berhasil! Mengarahkan ke dashboard...', {
+      timeout: 2000,
+      icon: '✓'
+    })
+    
+    // Tunggu sebentar sebelum redirect agar toast terlihat
+    setTimeout(() => {
+      router.push({ name: 'dashboard' })
+    }, 1500)
+    
+  } catch (error) {
+    console.error('Login error:', error)
+    
+    // Handle error dengan toast
+    const errorMessage = error?.response?.data?.detail || 'Login gagal. Periksa username dan password Anda.'
+    
+    toast.error(errorMessage, {
+      timeout: 4000,
+      icon: '⚠️'
+    })
+    
+    // Clear password field on error
+    form.password = ''
+    
   } finally {
     loading.value = false
   }
@@ -310,15 +331,6 @@ body {
   position: relative;
 }
 
-/* Enhanced Alert */
-.alert-danger {
-  background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
-  border: 1px solid #fca5a5 !important;
-  border-radius: 10px !important;
-  color: #dc2626 !important;
-  font-size: 0.9rem;
-}
-
 /* Form Labels */
 .form-label {
   font-size: 0.9rem;
@@ -346,16 +358,6 @@ body {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-}
-
-.animate-shake {
-  animation: shake 0.6s ease-in-out;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-8px); }
-  75% { transform: translateX(8px); }
 }
 
 /* Responsive Enhancements */

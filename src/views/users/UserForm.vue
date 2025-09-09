@@ -41,12 +41,8 @@
           </small>
         </div>
 
-        <div v-if="errorMsg" class="alert alert-danger py-2">
-          <pre class="m-0" style="white-space: pre-wrap">{{ errorMsg }}</pre>
-        </div>
-
         <div class="d-flex gap-2">
-          <button class="btn btn-primary" :disabled="saving">
+          <button class="btn btn-primary" :disabled="saving" type="submit">
             {{ saving ? "Menyimpan..." : "Simpan" }}
           </button>
           <router-link class="btn btn-outline-secondary" to="/users">
@@ -62,13 +58,14 @@
 import { onMounted, reactive, ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { UserAPI } from "@/services/api";
+import { useToast } from "vue-toastification";  // Import useToast
 
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();  // Inisialisasi toast
 
 const isEdit = computed(() => !!route.params.id);
 const saving = ref(false);
-const errorMsg = ref("");
 
 const form = reactive({
   username: "",
@@ -84,13 +81,15 @@ onMounted(async () => {
     form.email = data?.email ?? "";
     form.password = "";
   } catch (e) {
-    errorMsg.value = extractErrors(e);
+    toast.error("Gagal memuat detail user", {
+      timeout: 3000,
+      icon: '❌'
+    });
     console.error("Gagal memuat detail user:", e?.response?.data || e);
   }
 });
 
 async function onSubmit() {
-  errorMsg.value = "";
   saving.value = true;
 
   try {
@@ -102,7 +101,10 @@ async function onSubmit() {
 
     if (!isEdit.value) {
       if (!form.password || !form.password.trim()) {
-        errorMsg.value = "Password wajib diisi saat membuat user baru.";
+        toast.error("Password wajib diisi saat membuat user baru.", {
+          timeout: 3000,
+          icon: '❌'
+        });
         saving.value = false;
         return;
       }
@@ -113,13 +115,24 @@ async function onSubmit() {
 
     if (isEdit.value) {
       await UserAPI.update(route.params.id, payload);
+      toast.success("User berhasil diperbarui!", {
+        timeout: 3000,
+        icon: '✅'
+      });
     } else {
       await UserAPI.create(payload);
+      toast.success("User berhasil ditambahkan!", {
+        timeout: 3000,
+        icon: '➕'
+      });
     }
 
     router.push("/users");
   } catch (e) {
-    errorMsg.value = extractErrors(e);
+    toast.error(extractErrors(e), {
+      timeout: 4000,
+      icon: '❌'
+    });
     console.error("Gagal menyimpan user:", e?.response?.data || e);
   } finally {
     saving.value = false;
